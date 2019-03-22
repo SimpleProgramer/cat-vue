@@ -1,23 +1,43 @@
 <template>
     <div id="box">
+      <div class="span-10"></div>
       <input type="text" class="account usr" placeholder="请输入账号" />
       <div class="span"></div>
-      <input type="text" class="account pwd" placeholder="请输入密码" />
+      <input type="text" class="account pwd" ref="password" placeholder="请输入密码" />
       <div class="span"></div>
-      <van-button type="default" id="login" v-on:click="login()">登陆</van-button>
+      <van-button round type="danger" size="large" style="width:77%;border:0px;background: -webkit-linear-gradient(left top, #a000fb , #c81fff);box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" id="login" v-on:click="login()">登录</van-button>
     </div>
-
-
 </template>
 <script>
   export default ({
     methods: {
+      initWebSocket:function(){ //初始化weosocket
+        const wsuri = this.global.ws_api + "/websocket";//ws地址
+        var websock = new WebSocket(wsuri);
+        console.log("ready to connect ws :" + wsuri)
+        this.global.setWs(websock);
+        websock.onopen = () => {
+          console.log("connect successed")
+          this.$router.push({path: '/message'})
+          this.app.$attrs()
+        }
+      },
       login : function () {
+        this.initWebSocket()
+      },
+      sendWsMessage() {
+        if (this.global.ws && this.global.ws.readyState == 1) {
+            console.log("发送ws消息")
+
+        }
       }
     }
   })
 </script>
 <style>
+  .span-10 {
+    min-height:40vh;
+  }
   .usr {
     background: url(../../static/images/account.png) no-repeat 10px center;
     -webkit-background-size: 10%;
@@ -51,9 +71,16 @@
     color: white;
   }
   #box {
-    margin-top: 60px;
+    background: url(../../static/images/bg.jpg) no-repeat center center fixed;
+    -webkit-background-size: 100%;
+    background-size: 100%;
+    min-height:100vh;
+
   }
   .span {
     margin-top: 30px;
+  }
+  #login {
+    -moz-border-radius: 30px;
   }
 </style>

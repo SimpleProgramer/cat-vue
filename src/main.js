@@ -4,9 +4,11 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import Vant from 'vant';
+import global from './global/globalVar.js'
 import 'vant/lib/index.css';
 
 Vue.use(Vant);
+Vue.prototype.global = global
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
