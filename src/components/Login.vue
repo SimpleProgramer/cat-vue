@@ -1,33 +1,63 @@
 <template>
     <div id="box">
-      <div class="span-10"></div>
-      <input type="text" class="account usr" placeholder="请输入账号" />
-      <div class="span"></div>
-      <input type="text" class="account pwd" ref="password" placeholder="请输入密码" />
-      <div class="span"></div>
-      <van-button round type="danger" size="large" style="width:77%;border:0px;background: -webkit-linear-gradient(left top, #a000fb , #c81fff);box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" id="login" v-on:click="login()">登录</van-button>
+      <div ></div>
+      <div class="span-10">
+        <img slot="thumb" style="  width: 30%;    position:absolute;  transform: translate(-50%, 12%);border-radius: 50%;"  src="../../static/images/tx.jpg" />
+      </div>
+
+      <div id="content">
+        <input type="text" class="account usr" v-model="account" placeholder="请输入账号" />
+        <div class="span"></div>
+        <input type="password" class="account pwd" v-model="password" placeholder="请输入密码" />
+        <div class="span"></div>
+        <van-button round type="danger" size="large" style="width:77%;border:0px;background: -webkit-linear-gradient(left top, #a000fb , #c81fff);box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" id="login" v-on:click="login()">登录</van-button>
+      </div>
     </div>
 </template>
 <script>
   export default ({
+    data() {
+      return {
+        account: '1125334796',
+        password: 'waitgd250'
+      }
+    },
     methods: {
       initWebSocket:function(){ //初始化weosocket
         const wsuri = this.global.ws_api + "/websocket";//ws地址
         var websock = new WebSocket(wsuri);
         console.log("ready to connect ws :" + wsuri)
         this.global.setWs(websock);
+
+        this.global.imMessage.accounts[0] = this.account;
+        this.global.imMessage.password = this.password;
+
         websock.onopen = () => {
           console.log("connect successed")
-          this.$router.push({path: '/message'})
-          this.app.$attrs()
+          this.sendWsMessage();
         }
+        websock.onmessage = (event) => {
+          console.log(event.data);
+          var json = JSON.parse(event.data)
+          if (200 != json.code) {
+
+            console.log(json.body)
+            this.$toast.fail(json.body);
+          } else {
+            //{"accounts":[1125334796],"body":"密码错误","code":403,"password":"waitgd250","timestamp":1553311756708,"type":1}
+            this.$router.push({path: '/message'})
+          }
+        }
+
       },
       login : function () {
         this.initWebSocket()
       },
       sendWsMessage() {
+        console.log("发送ws消息")
         if (this.global.ws && this.global.ws.readyState == 1) {
-            console.log("发送ws消息")
+            console.log("发送ws消息:" + this.global.imMessage)
+          this.global.ws.send(JSON.stringify(this.global.imMessage));
 
         }
       }
@@ -36,7 +66,9 @@
 </script>
 <style>
   .span-10 {
-    min-height:40vh;
+    position: absolute;
+    top: 20%;
+    width: 100%;
   }
   .usr {
     background: url(../../static/images/account.png) no-repeat 10px center;
@@ -70,12 +102,17 @@
   input::-webkit-input-placeholder { /* WebKit browsers */
     color: white;
   }
-  #box {
+  #box,content {
     background: url(../../static/images/bg.jpg) no-repeat center center fixed;
     -webkit-background-size: 100%;
     background-size: 100%;
     min-height:100vh;
 
+  }
+  #content {
+    position: absolute;
+    top: 45%;
+    width: 100%;
   }
   .span {
     margin-top: 30px;

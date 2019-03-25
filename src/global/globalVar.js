@@ -1,11 +1,12 @@
 export default {
   ws: {},
-  ws_api: 'ws://127.0.0.1:8080',
+  rest_api: 'http://192.168.0.101:8081',
+  ws_api: 'ws://192.168.0.101:8080',
   imMessage: {
     accounts: [1125334796],
     type: 1,
     code: 200,
-    body: '',
+    body: 'online',
     timestamp: new Date().getTime(),
     account: 1,
     password: 'waitgd250'
@@ -14,6 +15,6 @@ export default {
     this.ws = newWs;
   },
   setWs_api: function () {
-    this.ws_api = 'ws://127.0.0.1:8080'
+    this.ws_api = 'ws://192.168.0.101:8080'
   }
 }
