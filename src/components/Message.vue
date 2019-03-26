@@ -16,7 +16,7 @@
         <van-card
           num="19：59"
           centered
-          @click="startMessage"
+          @click="startMessage(item)"
         >
           <img slot="thumb" style="  width: 80%;    position:absolute;  transform: translate(-50%, 12%);border-radius: 50%;"  src="../../static/images/tx.jpg" />
           <div slot="title"  class="leftContent" style="font-weight: bolder;font-size:1.5em;">{{ item.name }}</div>
@@ -44,7 +44,8 @@
           toUserAccount: 0,
           name: '',
           lastMessage: '',
-          lastTime: ''
+          lastTime: '',
+          type: 2
         }],
         error: false
 
@@ -70,15 +71,21 @@
             }
           }.bind(this))
       },
-      startMessage() {
-        console.log("click")
+      startMessage(event) {
+        console.log(this.msgs)
+        console.log(event)
+        this.global.imMessage.accounts[0] = event.fromUserAccount;
+        this.global.imMessage.accounts[1] = event.toUserAccount;
+        this.global.imMessage.type = 2;
+        console.log(this.global.imMessage);
         this.$router.push({path: '/into'})
+        //
       }
     }
   }
 
 </script>
-<style>
+<style scoped>
   #msg {
     background-color: #fff;
     -webkit-background-size: cover;

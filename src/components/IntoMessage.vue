@@ -11,9 +11,6 @@
     </van-nav-bar>
     <van-list
       v-model="loading"
-      error-text="网络或许在开小差呢qwq"
-      loading-text=" "
-      @load="onLoad"
       style="margin-top:46px;"
     >
       <van-card
@@ -23,24 +20,11 @@
         :key="item.fromUserAccount"
         :class="[item.self?'rightA':'leftA']"
       >
+        <div class="::after"></div>
         <div slot="desc" class="leftContent" style="font-size: 1.1em;">
-          {{ item.msg }}
-          小黑屋 （纯文字游戏） 编辑 讨论
-          中文名 小黑{{ item.msg }}
-          小黑屋 （纯文字游戏） 编辑 讨论
-          中文名 小黑{{ item.msg }}
-          小黑屋 （纯文字游戏） 编辑 讨论
-          中文名 小黑屋 原版名称 A Dark Room 游戏类型 纯文字冒险游戏 游戏平台 电脑  NS [1]  游戏平台 Android 发行日期 2018年 NS版 [1]  内容主题 冒险，生存 玩家人数 单人
-          目录    小黑屋 （纯文字游戏） 编辑 讨论
-          中文名 小黑{{ item.msg }}
-          小黑屋 （纯文字游戏） 编辑 讨论
-          中文名 小黑{{ item.msg }}
-          小黑屋 （纯文字游戏） 编辑 讨论
-          中文名 小黑屋 原版名称 A Dark Room 游戏类型 纯文字冒险游戏 游戏平台 电脑  NS [1]  游戏平台 Android 发行日期 2018年 NS版 [1]  内容主题 冒险，生存 玩家人数 单人
-          目录
-
-          <div class="allow" ></div>
+          {{ item.lastMessage }}
         </div>
+
         <div slot="num" style="position: relative;right: 1%;top: 27%;font-size: 1.1em;">{{ item.lastTime }}</div>
         <img slot="thumb" style="  width: 80%;margin-top:35%; border-radius: 50%;"  src="../../static/images/tx.jpg" />
       </van-card>
@@ -52,8 +36,9 @@
       <van-field
         border
         size="normal"
+        v-model="msgInput"
        />
-      <van-tabbar-item icon="" >发送</van-tabbar-item>
+      <van-tabbar-item icon="" v-on:click="sendMsg"  >发送</van-tabbar-item>
     </van-tabbar>
   </div>
 </template>
@@ -63,35 +48,66 @@
       return {
         current: 1125334796,
         title: "朔夜",
+        msgInput: "1231",
         loading: false,
         chating: [{
-          fromUserAccount: 1125334796,
-          toUserAccount: 1252173251,
-          self: true,
-          name: '',
-          msg: '你说我儿豁嘛',
-          lastTime: ''
-        },{
-          fromUserAccount: 1252173251,
-          toUserAccount: 1125334796,
+          fromUserAccount: 0,
+          toUserAccount: 0,
           name: '',
           self: false,
-          msg: '你说我儿豁嘛',
-          lastTime: ''
+          lastMessage: '',
+          lastTime: '',
+          lastTimestamp: 0,
         }],
+        nowChat : {
+          fromUserAccount : 0,
+          toUserAccount : 0,
+          lastTimestamp : new Date().getTime()
+        },
         error: false
 
       }
     },
     methods:{
-      onLoad() {
+      loadHistory() {
+        console.log("这是加载了")
+        this.socketApi.sendSock(this.global.imMessage,this.intoCallback)
+      },
+      intoCallback : function (json) {
+        //{"chats":[{"fromUserAccount":1125334796,"headImg":"abc","lastMessage":"强啊老铁","lastTime":"14:25","lastTimestamp":1553495128,"name":"朔夜","toUserAccount":1252173251},{"fromUserAccount":1125334796,"headImg":"abc","lastMessage":"lgd今天斗鱼直播阿","lastTime":"15:13","lastTimestamp":1553498008,"name":"香槟","toUserAccount":892021606}],"code":200,"type":2}
+        console.log("收到into消息:" + JSON.stringify(json));
+        if (json.code == 200 && json.type == 2) {
+          this.chating = json.chats
+          var item = this.chating[0]
+          this.nowChat.fromUserAccount = item.self ? item.fromUserAccount : item.toUserAccount
+          this.nowChat.toUserAccount = item.self ? item.toUserAccount : item.fromUserAccount
 
+        }
+      },
+      sendMsg : function () {
+        console.log(this.msgInput)
+        this.global.imMessage.accounts[0] = this.nowChat.fromUserAccount
+        this.global.imMessage.accounts[1] = this.nowChat.toUserAccount
+        this.global.imMessage.type = 3
+        this.global.imMessage.body = this.msgInput
+        this.global.imMessage.timestamp = this.nowChat.lastTimestamp
+        var item = this.chating[0]
+        item.fromUserAccount = this.now().fromUserAccount
+        item.toUserAccount = this.now().toUserAccount
+        item.lastTimestamp = this.global.imM
+
+
+        console.log(this.global.imMessage)
       }
+    },
+    created() {
+      if (document.readyState === 'complete') this.loadHistory()
+      else document.addEventListener('load', () => this.loadHistory())
     }
   }
 
 </script>
-<style>
+<style scoped>
   #msg {
     background-color: #fff;
     -webkit-background-size: cover;
@@ -108,6 +124,7 @@
   .van-card {
     background-color: #fff;
     padding: 2px 10px;
+    width: 100vw;
   }
   .van-card:not(:first-child){
     margin-top: 10%;
@@ -117,41 +134,64 @@
   }
   .van-card__content {
     height: auto;
-    top:30px;
+    top:25px;
+    max-width: 66%;
+    display: inline-block;
   }
   .leftContent {
-    border : 1px solid #000;
     border-radius: 10px;
+    padding: 5px;
+    line-height: 30px;
+    min-width: 20px;
+  }
+  .van-card__thumb {
+    width: 60px;
+  }
+  .rightA::after {
+    clear:both;content:'';display:block;width:0;height:0;visibility:hidden;
+  }
+  .leftA::after {
+    clear:both;content:'';display:block;width:0;height:0;visibility:hidden;
+  }
+  .rightA .van-card__content {
+    float: right;
+  }
+  .leftA .van-card__content {
+    float: left;
   }
   .rightA .van-card__thumb {
+    height: auto;
+  }
+  .leftA .van-card__thumb {
     height: auto;
   }
   .rightA a {
     float: right;
   }
+  .leftA a {
+    float: left;
+  }
   .rightA .van-card__header {
     display: block;
   }
-
-  .rightA .allow {
-    width: 12px;
-    height: 12px;
-    border-top: 1px solid #999;
-    border-right: 1px solid #999;
-    transform: rotate(45deg);
-    position: relative;
-    right: 0px;
+  .leftA .van-card__header {
+    display: block;
   }
-  .leftA .allow {
-    width: 12px;
-    height: 12px;
-    border-bottom: 1px solid #999;
-    border-left: 1px solid #999;
-    position: relative;
-    left: 0px;
-    transform:rotate(45deg);
-
+  .rightA .leftContent {
+    background-color: #5FB878;
+    color: #fff;
+    min-height: 30px;
+    text-align: right;
+    letter-spacing: 2px;
   }
+  .leftA .leftContent {
+    background-color: #f1f1f1;
+    color: #000;
+    min-height: 30px;
+    text-align: left;
+    letter-spacing: 2px;
+  }
+
 
   .van-cell {
     width: 70%;

@@ -7,6 +7,7 @@ import Vant from 'vant';
 import Toast from 'vant';
 import global from './global/globalVar.js'
 import axios from 'axios'
+import * as socketApi from './socket'
 import Qs from 'qs'
 import 'vant/lib/index.css';
 
@@ -15,6 +16,7 @@ Vue.use(Toast);
 Vue.prototype.global = global
 Vue.prototype.axios = axios
 Vue.prototype.qs = Qs
+Vue.prototype.socketApi = socketApi
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

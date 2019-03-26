@@ -19,46 +19,28 @@
     data() {
       return {
         account: '1125334796',
-        password: 'waitgd250'
+        password: '123456'
       }
     },
     methods: {
       initWebSocket:function(){ //初始化weosocket
-        const wsuri = this.global.ws_api + "/websocket";//ws地址
-        var websock = new WebSocket(wsuri);
-        console.log("ready to connect ws :" + wsuri)
-        this.global.setWs(websock);
 
         this.global.imMessage.accounts[0] = this.account;
         this.global.imMessage.password = this.password;
-
-        websock.onopen = () => {
-          console.log("connect successed")
-          this.sendWsMessage();
-        }
-        websock.onmessage = (event) => {
-          console.log(event.data);
-          var json = JSON.parse(event.data)
-          if (200 != json.code) {
-
-            console.log(json.body)
-            this.$toast.fail(json.body);
-          } else {
-            //{"accounts":[1125334796],"body":"密码错误","code":403,"password":"waitgd250","timestamp":1553311756708,"type":1}
-            this.$router.push({path: '/message'})
-          }
-        }
-
+        this.global.imMessage.type = 1;
+        this.socketApi.sendSock(this.global.imMessage,this.loginCallback)
       },
       login : function () {
         this.initWebSocket()
       },
-      sendWsMessage() {
-        console.log("发送ws消息")
-        if (this.global.ws && this.global.ws.readyState == 1) {
-            console.log("发送ws消息:" + this.global.imMessage)
-          this.global.ws.send(JSON.stringify(this.global.imMessage));
-
+      loginCallback : function (json) {
+        console.log("denglu huidiaos" + json);
+        if (200 == json.code && json.type == 1) {
+          this.$router.push({path: '/message'})
+        } else {
+          //{"accounts":[1125334796],"body":"密码错误","code":403,"password":"waitgd250","timestamp":1553311756708,"type":1}
+          console.log(json.body)
+          this.$toast.fail(json.body);
         }
       }
     }
