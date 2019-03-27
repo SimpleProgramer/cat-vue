@@ -10,8 +10,8 @@
       <span size="large" slot="right"  style="font-size: 1.2em;font-weight:bolder;color:#1989fa;text-align: center;margin: 0 auto;">...</span>
     </van-nav-bar>
     <van-list
+      id="msgBox"
       v-model="loading"
-      style="margin-top:46px;"
     >
       <van-card
         num="19：59"
@@ -47,7 +47,7 @@
     data() {
       return {
         current: 1125334796,
-        title: "朔夜",
+        title: '',
         msgInput: "1231",
         loading: false,
         chating: [{
@@ -59,50 +59,84 @@
           lastTime: '',
           lastTimestamp: 0,
         }],
-        nowChat : {
-          fromUserAccount : 0,
-          toUserAccount : 0,
-          lastTimestamp : new Date().getTime()
-        },
+        nowChat : {},
+
         error: false
 
       }
     },
     methods:{
-      loadHistory() {
-        console.log("这是加载了")
-        this.socketApi.sendSock(this.global.imMessage,this.intoCallback)
+      loadUser() {
+        console.log("？？？？？？？？？")
+        var loginUser = sessionStorage.getItem("nowLogin")
+        if (loginUser != null && loginUser != '' && loginUser != 'undefined' && loginUser != 'null') {
+          var jsonUser = JSON.parse(loginUser);
+          this.nowChat.fromUserAccount = jsonUser.accounts[0]
+          sessionStorage.getItem("toUserAccount")
+        }
       },
       intoCallback : function (json) {
+        console.log("收到了消息回调:")
+        var loginUser = sessionStorage.getItem("nowLogin")
+        var jsonUser = JSON.parse(loginUser)
         //{"chats":[{"fromUserAccount":1125334796,"headImg":"abc","lastMessage":"强啊老铁","lastTime":"14:25","lastTimestamp":1553495128,"name":"朔夜","toUserAccount":1252173251},{"fromUserAccount":1125334796,"headImg":"abc","lastMessage":"lgd今天斗鱼直播阿","lastTime":"15:13","lastTimestamp":1553498008,"name":"香槟","toUserAccount":892021606}],"code":200,"type":2}
-        console.log("收到into消息:" + JSON.stringify(json));
-        if (json.code == 200 && json.type == 2) {
-          this.chating = json.chats
-          var item = this.chating[0]
-          this.nowChat.fromUserAccount = item.self ? item.fromUserAccount : item.toUserAccount
-          this.nowChat.toUserAccount = item.self ? item.toUserAccount : item.fromUserAccount
+        if (json.code == 200) {
+          if (json.type == 2) {
+            json.chats.forEach(c => {
+              c.self = c.fromUserAccount == jsonUser.accounts[0]
+            })
+            this.chating = json.chats;
+            console.log("初始化聊天记录:" + JSON.stringify(this.chating))
+            this.nowChat.toUserAccount = this.chating[0].self ? this.chating[0].toUserAccount : this.chating[0].fromUserAccount
+            var item = this.chating[0]
+            this.title = item.name
+          }else if (json.type == 3) {
+            var item = {};
+
+            item.self = jsonUser.accounts[0] == json.accounts[0];
+            item.fromUserAccount = json.accounts[0]
+            item.toUserAccount = json.accounts[1]
+            item.lastMessage = json.body
+            item.lastTimestamp = json.timestamp
+            item.lastTime = json.timeStr
+            this.chating.push(item);
+            var va1  = sessionStorage.getItem("nowTalking")
+            var result = JSON.parse(va1);
+            result.chats = this.chating
+            sessionStorage.setItem("nowTalking",JSON.stringify(result))
+          }
 
         }
       },
       sendMsg : function () {
         console.log(this.msgInput)
-        this.global.imMessage.accounts[0] = this.nowChat.fromUserAccount
-        this.global.imMessage.accounts[1] = this.nowChat.toUserAccount
-        this.global.imMessage.type = 3
-        this.global.imMessage.body = this.msgInput
-        this.global.imMessage.timestamp = this.nowChat.lastTimestamp
-        var item = this.chating[0]
-        item.fromUserAccount = this.now().fromUserAccount
-        item.toUserAccount = this.now().toUserAccount
-        item.lastTimestamp = this.global.imM
-
-
-        console.log(this.global.imMessage)
+        var imMessage = this.global.imMessage
+        imMessage.accounts[0] = this.nowChat.fromUserAccount
+        imMessage.accounts[1] = this.nowChat.toUserAccount
+        imMessage.type = 3
+        imMessage.body = this.msgInput
+        imMessage.timestamp = new Date().getTime()
+        var item = {};
+        item.fromUserAccount = this.nowChat.fromUserAccount
+        item.toUserAccount = this.nowChat.toUserAccount
+        item.lastTimestamp = this.global.imMessage.timestamp
+        console.log(imMessage)
+        this.socketApi.sendSock(this.global.imMessage,this.intoCallback)
       }
     },
     created() {
-      if (document.readyState === 'complete') this.loadHistory()
-      else document.addEventListener('load', () => this.loadHistory())
+      this.loadUser();
+       var chatingCache = sessionStorage.getItem("nowTalking")
+      if (chatingCache != '' && chatingCache != 'undefined' && chatingCache != null && chatingCache != 'null') {
+        this.intoCallback(JSON.parse(chatingCache))
+      } else {
+        this.chating = this.$route.params.chats;
+        sessionStorage.setItem("nowTalking",JSON.stringify(this.chating))
+      }
+
+    },
+    mounted() {
+      document.getElementById("msgBox").scrollTo(0,document.getElementById("msgBox").scrollHeight+1000)
     }
   }
 
@@ -116,7 +150,7 @@
   }
   .van-list {
     position: fixed;
-    top: 0;
+    top: 46px;
     bottom: 9%;
     overflow: auto;
   }

@@ -1,5 +1,5 @@
 export default {
-  ws: {},
+  ws: null,
   rest_api: 'http://127.0.0.1:8081',
   ws_api: 'ws://127.0.0.1:8080',
   imMessage: {
@@ -11,6 +11,7 @@ export default {
     account: 1,
     password: 'waitgd250'
   },
+  msg:"msgHistory",
   setWs: function (newWs) {
     this.ws = newWs;
   },

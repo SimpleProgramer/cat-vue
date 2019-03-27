@@ -22,6 +22,11 @@ Vue.config.productionTip = false
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  data() {
+    return{
+      wsssss:"1"
+    }
+  },
   router,
   components: { App },
   template: '<App/>'

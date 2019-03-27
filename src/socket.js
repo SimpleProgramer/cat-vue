@@ -2,23 +2,40 @@ var websock = null;
 var global_callback = null;
 var serverPort = '8080';	//webSocket连接端口
 
-
 function getWebIP(){
   var curIP = window.location.hostname;
   return curIP;
 }
-
 function initWebSocket(){ //初始化weosocket
   //ws地址
-  var wsuri = "ws://" +getWebIP()+ ":" + serverPort + "/websocket";
-  websock = new WebSocket(wsuri);
+  var cacheSock = null; //sessionStorage.socket
+  if (cacheSock != '' && cacheSock != 'undefined' && cacheSock != null) {
+    console.log(cacheSock.socket)
+    websock =   cacheSock.socket
+  } else {
+    console.log("新建链接")
+    var wsuri = "ws://" +getWebIP()+ ":" + serverPort + "/websocket";
+    websock = new WebSocket(wsuri);
+
+  }
   websock.onmessage = function(e){
-    websocketonmessage(e);
+    if (websock.readyState != 1) {
+      initWebSocket()
+    }
+    console.log("返回数据:" + JSON.parse(e.data).type);
+    if (e.data != null) {
+      if (JSON.parse(e.data).type == 666) {
+        console.log("心跳:pong：{}", JSON.stringify(e.data));
+      } else {
+        websocketonmessage(e);
+      }
+    }
   }
   websock.onclose = function(e){
     websocketclose(e);
   }
   websock.onopen = function () {
+    console.log("连接成功:" + sessionStorage.getItem("nowLogin"));
     websocketOpen();
   }
 
@@ -31,6 +48,8 @@ function initWebSocket(){ //初始化weosocket
 // 实际调用的方法
 function sendSock(agentData,callback){
   global_callback = callback;
+  console.log("callback:" + global_callback)
+  console.log("发送websocket信息:" + agentData)
   if (websock.readyState === websock.OPEN) {
     //若是ws开启状态
     websocketsend(agentData)
@@ -60,10 +79,31 @@ function websocketsend(agentData){
 //关闭
 function websocketclose(e){
   console.log("connection closed (" + e.code + ")");
+  sessionStorage.removeItem("nowSocket")
 }
 
 function websocketOpen(e){
-  console.log("连接成功");
+  console.log("刷新通道")
+  var loginUser = sessionStorage.getItem("nowLogin")
+  var json = JSON.parse(loginUser)
+  var refresh = {
+    "accounts":[json.accounts[0]],
+    "type": 999
+  };
+  console.log(JSON.stringify(refresh))
+  websocketsend(refresh);
+
+  setInterval(function () {
+    console.log("心跳续约:" + JSON.stringify(refresh))
+    refresh.type = 666
+    websocketsend(refresh);
+  }, 5000);
+
+}
+function saveJson(jsonE) {
+  var jsonEse = JSON.stringify(jsonE);
+  sessionStorage.socket = jsonEse;
+  //  sessionStorage.removeItem('jsonEsesession');
 }
 
 initWebSocket();

@@ -71,14 +71,20 @@
             }
           }.bind(this))
       },
+
+      notifyForMsg:function (json) {
+        sessionStorage.setItem("nowTalking",JSON.stringify(json))
+        //根据登陆用户判断发送人和接收人
+        this.$router.push({name: 'Into',params:json})
+      },
       startMessage(event) {
         console.log(this.msgs)
-        console.log(event)
-        this.global.imMessage.accounts[0] = event.fromUserAccount;
-        this.global.imMessage.accounts[1] = event.toUserAccount;
-        this.global.imMessage.type = 2;
-        console.log(this.global.imMessage);
-        this.$router.push({path: '/into'})
+        var imMessage = this.global.imMessage
+        imMessage.accounts[0] = event.fromUserAccount
+        imMessage.accounts[1] = event.toUserAccount
+        imMessage.type = 2
+        this.socketApi.sendSock(imMessage,this.notifyForMsg);
+
         //
       }
     }
