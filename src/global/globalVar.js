@@ -1,6 +1,6 @@
 export default {
   ws: null,
-  rest_api: 'http://127.0.0.1:8081',
+  rest_api: 'http://'+ window.location.hostname+':8081',
   ws_api: 'ws://127.0.0.1:8080',
   imMessage: {
     accounts: [1125334796],

@@ -26,7 +26,7 @@
         </div>
 
         <div slot="num" style="position: relative;right: 1%;top: 27%;font-size: 1.1em;">{{ item.lastTime }}</div>
-        <img slot="thumb" style="  width: 80%;margin-top:35%; border-radius: 50%;"  src="../../static/images/tx.jpg" />
+        <img slot="thumb" style="  width: 80%;margin-top:35%; border-radius: 50%;"  src="/static/images/tx.jpg" />
       </van-card>
     </van-list>
 
@@ -88,8 +88,7 @@
             this.chating = json.chats;
             console.log("初始化聊天记录:" + JSON.stringify(this.chating))
             this.nowChat.toUserAccount = this.chating[0].self ? this.chating[0].toUserAccount : this.chating[0].fromUserAccount
-            var item = this.chating[0]
-            this.title = item.name
+            this.title = this.chating[0].self ? this.chating[0].toUserName : this.chating[0].fromUserName
           }else if (json.type == 3) {
             var item = {};
 

@@ -2,7 +2,7 @@
     <div id="box">
       <div ></div>
       <div class="span-10">
-        <img slot="thumb" style="  width: 30%;    position:absolute;  transform: translate(-50%, 12%);border-radius: 50%;"  src="../../static/images/tx.jpg" />
+        <img slot="thumb" style="  width: 30%;    position:absolute;  transform: translate(-50%, 12%);border-radius: 50%;"  src="/static/images/tx.jpg" />
       </div>
 
       <div id="content">
@@ -54,14 +54,14 @@
     width: 100%;
   }
   .usr {
-    background: url(../../static/images/account.png) no-repeat 10px center;
+    background: url(/static/images/account.png) no-repeat 10px center;
     -webkit-background-size: 10%;
     background-size: 10%;
     background-color:rgba(255,255,255,0.3);
   }
 
   .pwd {
-    background: url(../../static/images/pwd.png) no-repeat 20px 20px;
+    background: url(/static/images/pwd.png) no-repeat 20px 20px;
     -webkit-background-size: 10%;
     background-size: 10%;
     background-color:rgba(255,255,255,0.3);
@@ -86,7 +86,7 @@
     color: white;
   }
   #box,content {
-    background: url(../../static/images/bg.jpg) no-repeat center center fixed;
+    background: url(/static/images/bg.jpg) no-repeat center center fixed;
     -webkit-background-size: 100%;
     background-size: 100%;
     min-height:100vh;

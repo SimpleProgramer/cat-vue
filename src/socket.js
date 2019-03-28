@@ -1,7 +1,6 @@
 var websock = null;
 var global_callback = null;
 var serverPort = '8080';	//webSocket连接端口
-
 function getWebIP(){
   var curIP = window.location.hostname;
   return curIP;
@@ -22,7 +21,7 @@ function initWebSocket(){ //初始化weosocket
     if (websock.readyState != 1) {
       initWebSocket()
     }
-    console.log("返回数据:" + JSON.parse(e.data).type);
+    console.log("返回数据:" + e.data);
     if (e.data != null) {
       if (JSON.parse(e.data).type == 666) {
         console.log("心跳:pong：{}", JSON.stringify(e.data));
@@ -48,8 +47,6 @@ function initWebSocket(){ //初始化weosocket
 // 实际调用的方法
 function sendSock(agentData,callback){
   global_callback = callback;
-  console.log("callback:" + global_callback)
-  console.log("发送websocket信息:" + agentData)
   if (websock.readyState === websock.OPEN) {
     //若是ws开启状态
     websocketsend(agentData)
@@ -83,9 +80,8 @@ function websocketclose(e){
 }
 
 function websocketOpen(e){
-  console.log("刷新通道")
   var loginUser = sessionStorage.getItem("nowLogin")
-  var json = JSON.parse(loginUser)
+  var json = JSON.parse(loginUser);
   var refresh = {
     "accounts":[json.accounts[0]],
     "type": 999
@@ -94,7 +90,6 @@ function websocketOpen(e){
   websocketsend(refresh);
 
   setInterval(function () {
-    console.log("心跳续约:" + JSON.stringify(refresh))
     refresh.type = 666
     websocketsend(refresh);
   }, 5000);

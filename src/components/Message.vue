@@ -18,7 +18,7 @@
           centered
           @click="startMessage(item)"
         >
-          <img slot="thumb" style="  width: 80%;    position:absolute;  transform: translate(-50%, 12%);border-radius: 50%;"  src="../../static/images/tx.jpg" />
+          <img slot="thumb" style="  width: 80%;    position:absolute;  transform: translate(-50%, 12%);border-radius: 50%;"  src="/static/images/tx.jpg" />
           <div slot="title"  class="leftContent" style="font-weight: bolder;font-size:1.5em;">{{ item.name }}</div>
           <div slot="desc" class="leftContent" style="font-size: 1.1em;">{{ item.lastMessage }}</div>
           <div slot="num" style="position: absolute;right: 1%;top: 27%;font-size: 1.1em;">{{ item.lastTime }}</div>
@@ -42,7 +42,12 @@
         msgs: [{
           fromUserAccount: 0,
           toUserAccount: 0,
+          fromUserName: '',
+          toUserName: '',
+          fromUserHeadImg: '',
+          toUserHeadImg: '',
           name: '',
+          headImg: '',
           lastMessage: '',
           lastTime: '',
           type: 2
@@ -63,7 +68,12 @@
         })
           .then(function(res){
             console.log(res.data.data)
-            this.msgs = res.data.data
+            var msgs = res.data.data
+            msgs.forEach( e => {
+              e.name = e.fromUserAccount == this.global.imMessage.accounts[0] ? e.fromUserName : e.toUserName
+              e.headImg = e.fromUserAccount == this.global.imMessage.accounts[0] ? e.fromUserHeadImg : e.toUserHeadImg
+            })
+            this.msgs = msgs
           }.bind(this))
           .catch(function(err){
             if(err.response) {
@@ -73,6 +83,7 @@
       },
 
       notifyForMsg:function (json) {
+        console.log("收到的信息:" + JSON.stringify(json))
         sessionStorage.setItem("nowTalking",JSON.stringify(json))
         //根据登陆用户判断发送人和接收人
         this.$router.push({name: 'Into',params:json})
