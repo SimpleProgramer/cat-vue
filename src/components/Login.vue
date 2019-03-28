@@ -34,13 +34,13 @@
         this.initWebSocket()
       },
       loginCallback : function (json) {
-        console.log("denglu huidiaos" + json);
+        //console.log("denglu huidiaos" + json);
         if (200 == json.code && json.type == 1) {
           sessionStorage.setItem("nowLogin",JSON.stringify(json))
           this.$router.push({path: '/message'})
         } else {
           //{"accounts":[1125334796],"body":"密码错误","code":403,"password":"waitgd250","timestamp":1553311756708,"type":1}
-          console.log(json.body)
+          //console.log(json.body)
           this.$toast.fail(json.body);
         }
       }

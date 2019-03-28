@@ -58,7 +58,7 @@
     },
     methods:{
       onLoad() {
-        console.log(this.global.imMessage.accounts[0])
+        //console.log(this.global.imMessage.accounts[0])
         this.loading = false
 
         this.axios.get(this.global.rest_api + '/api/v1/chatlist',{
@@ -67,7 +67,7 @@
           }
         })
           .then(function(res){
-            console.log(res.data.data)
+            //console.log(res.data.data)
             var msgs = res.data.data
             msgs.forEach( e => {
               e.name = e.fromUserAccount == this.global.imMessage.accounts[0] ? e.fromUserName : e.toUserName
@@ -77,19 +77,19 @@
           }.bind(this))
           .catch(function(err){
             if(err.response) {
-              console.log(err.response)
+              //console.log(err.response)
             }
           }.bind(this))
       },
 
       notifyForMsg:function (json) {
-        console.log("收到的信息:" + JSON.stringify(json))
+        //console.log("收到的信息:" + JSON.stringify(json))
         sessionStorage.setItem("nowTalking",JSON.stringify(json))
         //根据登陆用户判断发送人和接收人
         this.$router.push({name: 'Into',params:json})
       },
       startMessage(event) {
-        console.log(this.msgs)
+        //console.log(this.msgs)
         var imMessage = this.global.imMessage
         imMessage.accounts[0] = event.fromUserAccount
         imMessage.accounts[1] = event.toUserAccount

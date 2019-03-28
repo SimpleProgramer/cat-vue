@@ -37,6 +37,7 @@
         border
         size="normal"
         v-model="msgInput"
+        @keyup.enter="sendMsg"
        />
       <van-tabbar-item icon="" v-on:click="sendMsg"  >发送</van-tabbar-item>
     </van-tabbar>
@@ -48,7 +49,7 @@
       return {
         current: 1125334796,
         title: '',
-        msgInput: "1231",
+        msgInput: "",
         loading: false,
         chating: [{
           fromUserAccount: 0,
@@ -67,7 +68,7 @@
     },
     methods:{
       loadUser() {
-        console.log("？？？？？？？？？")
+        //console.log("？？？？？？？？？")
         var loginUser = sessionStorage.getItem("nowLogin")
         if (loginUser != null && loginUser != '' && loginUser != 'undefined' && loginUser != 'null') {
           var jsonUser = JSON.parse(loginUser);
@@ -76,7 +77,6 @@
         }
       },
       intoCallback : function (json) {
-        console.log("收到了消息回调:")
         var loginUser = sessionStorage.getItem("nowLogin")
         var jsonUser = JSON.parse(loginUser)
         //{"chats":[{"fromUserAccount":1125334796,"headImg":"abc","lastMessage":"强啊老铁","lastTime":"14:25","lastTimestamp":1553495128,"name":"朔夜","toUserAccount":1252173251},{"fromUserAccount":1125334796,"headImg":"abc","lastMessage":"lgd今天斗鱼直播阿","lastTime":"15:13","lastTimestamp":1553498008,"name":"香槟","toUserAccount":892021606}],"code":200,"type":2}
@@ -86,10 +86,11 @@
               c.self = c.fromUserAccount == jsonUser.accounts[0]
             })
             this.chating = json.chats;
-            console.log("初始化聊天记录:" + JSON.stringify(this.chating))
+            //console.log("初始化聊天记录:" + JSON.stringify(this.chating))
             this.nowChat.toUserAccount = this.chating[0].self ? this.chating[0].toUserAccount : this.chating[0].fromUserAccount
             this.title = this.chating[0].self ? this.chating[0].toUserName : this.chating[0].fromUserName
           }else if (json.type == 3) {
+            //console.log(JSON.stringify(json))
             var item = {};
 
             item.self = jsonUser.accounts[0] == json.accounts[0];
@@ -103,12 +104,15 @@
             var result = JSON.parse(va1);
             result.chats = this.chating
             sessionStorage.setItem("nowTalking",JSON.stringify(result))
+            this.$nextTick(() => {
+              document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight
+            })
           }
 
         }
       },
       sendMsg : function () {
-        console.log(this.msgInput)
+        //console.log(this.msgInput)
         var imMessage = this.global.imMessage
         imMessage.accounts[0] = this.nowChat.fromUserAccount
         imMessage.accounts[1] = this.nowChat.toUserAccount
@@ -119,12 +123,14 @@
         item.fromUserAccount = this.nowChat.fromUserAccount
         item.toUserAccount = this.nowChat.toUserAccount
         item.lastTimestamp = this.global.imMessage.timestamp
-        console.log(imMessage)
+        //console.log(imMessage)
         this.socketApi.sendSock(this.global.imMessage,this.intoCallback)
+        this.msgInput = ''
       }
     },
     created() {
       this.loadUser();
+      this.socketApi.setCallback(this.intoCallback)
        var chatingCache = sessionStorage.getItem("nowTalking")
       if (chatingCache != '' && chatingCache != 'undefined' && chatingCache != null && chatingCache != 'null') {
         this.intoCallback(JSON.parse(chatingCache))
@@ -135,7 +141,17 @@
 
     },
     mounted() {
-      document.getElementById("msgBox").scrollTo(0,document.getElementById("msgBox").scrollHeight+1000)
+      this.$nextTick(() => {
+        document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight
+      })
+    },
+    watch: {
+      chating() {
+        this.$nextTick(() => {
+          document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight
+        })
+      },
+      deep:true
     }
   }
 

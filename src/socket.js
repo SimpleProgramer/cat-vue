@@ -9,10 +9,10 @@ function initWebSocket(){ //初始化weosocket
   //ws地址
   var cacheSock = null; //sessionStorage.socket
   if (cacheSock != '' && cacheSock != 'undefined' && cacheSock != null) {
-    console.log(cacheSock.socket)
+    //console.log(cacheSock.socket)
     websock =   cacheSock.socket
   } else {
-    console.log("新建链接")
+    //console.log("新建链接")
     var wsuri = "ws://" +getWebIP()+ ":" + serverPort + "/websocket";
     websock = new WebSocket(wsuri);
 
@@ -21,10 +21,10 @@ function initWebSocket(){ //初始化weosocket
     if (websock.readyState != 1) {
       initWebSocket()
     }
-    console.log("返回数据:" + e.data);
+    //console.log("返回数据:" + e.data);
     if (e.data != null) {
       if (JSON.parse(e.data).type == 666) {
-        console.log("心跳:pong：{}", JSON.stringify(e.data));
+        //console.log("心跳:pong：{}", JSON.stringify(e.data));
       } else {
         websocketonmessage(e);
       }
@@ -34,13 +34,13 @@ function initWebSocket(){ //初始化weosocket
     websocketclose(e);
   }
   websock.onopen = function () {
-    console.log("连接成功:" + sessionStorage.getItem("nowLogin"));
+    //console.log("连接成功:" + sessionStorage.getItem("nowLogin"));
     websocketOpen();
   }
 
   //连接发生错误的回调方法
   websock.onerror = function () {
-    console.log("WebSocket连接发生错误");
+    //console.log("WebSocket连接发生错误");
   }
 }
 
@@ -75,24 +75,25 @@ function websocketsend(agentData){
 
 //关闭
 function websocketclose(e){
-  console.log("connection closed (" + e.code + ")");
+  //console.log("connection closed (" + e.code + ")");
   sessionStorage.removeItem("nowSocket")
 }
 
 function websocketOpen(e){
   var loginUser = sessionStorage.getItem("nowLogin")
   var json = JSON.parse(loginUser);
-  var refresh = {
-    "accounts":[json.accounts[0]],
-    "type": 999
-  };
-  console.log(JSON.stringify(refresh))
-  websocketsend(refresh);
+  if (json != null) {
+    var refresh = {
+      "accounts":[json.accounts[0]],
+      "type": 999
+    };
+    //console.log(JSON.stringify(refresh))
+    setInterval(function () {
+      refresh.type = 666
+      websocketsend(refresh);
+    }, 30 * 1000);
+  }
 
-  setInterval(function () {
-    refresh.type = 666
-    websocketsend(refresh);
-  }, 5000);
 
 }
 function saveJson(jsonE) {
@@ -100,7 +101,11 @@ function saveJson(jsonE) {
   sessionStorage.socket = jsonEse;
   //  sessionStorage.removeItem('jsonEsesession');
 }
+function setCallback(callback) {
+  global_callback = callback
+}
 
 initWebSocket();
 
 export{sendSock}
+export{setCallback}

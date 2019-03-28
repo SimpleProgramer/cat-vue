@@ -9,7 +9,6 @@ export default {
   name: 'App',
   created() {
     var long = sessionStorage.getItem("nowLogin");
-    console.log(long);
     if (long == null) {
       this.$router.push({path:'/login'})
     }
